@@ -12,9 +12,9 @@ DOMAINS_FILE="/tmp/domains.txt"
 echo "[*] Capturing DNS traffic from $HOST_IP for $DURATION seconds..."
 timeout "$DURATION" tcpdump -i br0 -n port 53 and host "$HOST_IP" -w "$PCAP_FILE"
 
-# Extract domains using tshark
+# Extract domains using tshark and deduplicate the output
 echo "[*] Extracting domain queries..."
-tshark -r "$PCAP_FILE" -Y "dns.qry.name" -T fields -e dns.qry.name > "$DOMAINS_FILE"
+tshark -r "$PCAP_FILE" -Y "dns.qry.name" -T fields -e dns.qry.name | sort -u > "$DOMAINS_FILE"
 
 # Show results
 echo "[*] Domains found:"
@@ -23,3 +23,4 @@ cat "$DOMAINS_FILE"
 # Cleanup
 rm -f "$PCAP_FILE"
 echo "[*] Temporary pcap file deleted."
+
